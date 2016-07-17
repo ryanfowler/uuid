@@ -54,11 +54,12 @@ func main() {
 ```
 will output something like: `e83915a5-a2c6-573b-a5f7-8cf2badd0af5`.
 
-NewV5 will return identical UUIDs if the same namespace and name are used multiple times.
+UUIDs generated from NewV5 with the same namespace & name will be equal every time NewV5 is called.
+In other words, `same input -> same output`.
 
 #### Formatting
 
-A UUID represents 16 byte array (128 bits).
+A UUID represents a 16 byte array (128 bits).
 In order to use the UUID in a human-readable form, either `Format` or `FormatString` should be used.
 
 Format will returns the UUID bytes in the format:
