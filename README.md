@@ -1,4 +1,4 @@
-# UUID
+# UUID [![GoDoc](https://godoc.org/github.com/ryanfowler/uuid?status.svg)](https://godoc.org/github.com/ryanfowler/uuid) [![Go Report Card](https://goreportcard.com/badge/github.com/ryanfowler/uuid)](https://goreportcard.com/report/github.com/ryanfowler/uuid)
 
 UUID provides functions for generating and formatting UUIDs according to RFC 4122.
 
