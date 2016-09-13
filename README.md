@@ -62,14 +62,35 @@ In other words, `same input -> same output`.
 A UUID represents a 16 byte array (128 bits).
 In order to use the UUID in a human-readable form, either `Format` or `FormatString` should be used.
 
-Format will returns the UUID bytes in the format:
+Format will return the UUID bytes in the format:
 ```
 xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 where `x`'s are hexadecimal characters.
 
 FormatString will return the string representation of the above UUID format.
-The returned UUID will have a length of 36 bytes.
+The returned UUID string will have a length of 36 bytes.
+
+#### Parsing
+
+A UUID can be parsed from the following formats:
+
+- A 16-byte raw UUID.
+- A 32-byte hexadecimal UUID without dashes e.g. 9e754ef68dd94903af437aea99bfb1fe
+- A 36-byte hexadecimal UUID with dashes e.g. 9e754ef6-8dd9-4903-af43-7aea99bfb1fe
+
+Example:
+
+```go
+b := []byte("9e754ef6-8dd9-4903-af43-7aea99bfb1fe")
+u, err := uuid.Parse(b)
+if err != nil {
+	return
+}
+fmt.Println(u.FormatString())
+```
+
+will ouput: `9e754ef6-8dd9-4903-af43-7aea99bfb1fe`.
 
 ## License
 

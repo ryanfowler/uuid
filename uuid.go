@@ -29,6 +29,7 @@ import (
 	"crypto/rand"
 	"crypto/sha1"
 	"encoding/hex"
+	"errors"
 	"hash"
 )
 
@@ -61,13 +62,14 @@ func NewV5(namespace UUID, name []byte) UUID {
 	return usingHash(sha1.New(), namespace, name, 5)
 }
 
+const dash = '-'
+
 // Format returns the hexadecimal format of the UUID as an array of 36 bytes.
 //
 // Example: 9e754ef6-8dd9-5903-af43-7aea99bfb1fe
 func (u UUID) Format() [36]byte {
-	const dash = '-'
-
 	var buf [36]byte
+
 	hex.Encode(buf[:], u[:4])
 	buf[8] = dash
 	hex.Encode(buf[9:], u[4:6])
@@ -117,4 +119,58 @@ func setVersion(u *UUID, v byte) {
 // u.
 func setVariant(u *UUID) {
 	u[8] = u[8]&0x3f | 0x80
+}
+
+// ErrInvalidUUID represents the error returned during parsing when the provided
+// bytes do not represent a valid UUID.
+var ErrInvalidUUID = errors.New("uuid: invalid bytes provided")
+
+// Parse parses the provided UUID bytes, returning the UUID or any error
+// encountered. The following formats are provided:
+// - 16 byte raw UUID
+// - 32 byte formatted UUID without dashes e.g. 9e754ef68dd94903af437aea99bfb1fe
+// - 36 byte formatted UUID e.g "9e754ef6-8dd9-4903-af43-7aea99bfb1fe"
+func Parse(b []byte) (UUID, error) {
+	switch len(b) {
+	case 16:
+		var u UUID
+		copy(u[:], b)
+		return u, nil
+	case 32:
+		var u UUID
+		_, err := hex.Decode(u[:], b)
+		if err != nil {
+			return u, ErrInvalidUUID
+		}
+		return u, nil
+	case 36:
+		return parseFormatted(b)
+	default:
+		return UUID{}, ErrInvalidUUID
+	}
+}
+
+// ParseString parses the provided UUID string using the same rules as Parse.
+func ParseString(s string) (UUID, error) {
+	return Parse([]byte(s))
+}
+
+var uuidHexLengths = [5]int{8, 4, 4, 4, 12}
+
+// parses returns the parsed 36-byte string UUID into a 16-byte UUID.
+func parseFormatted(b []byte) (UUID, error) {
+	var u UUID
+	var iu, ib int
+	for idx, cnt := range uuidHexLengths {
+		n, err := hex.Decode(u[iu:], b[ib:ib+cnt])
+		if err != nil {
+			return u, ErrInvalidUUID
+		}
+		if idx < 4 && b[ib+cnt] != dash {
+			return u, ErrInvalidUUID
+		}
+		iu += n
+		ib += cnt + 1
+	}
+	return u, nil
 }

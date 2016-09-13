@@ -150,6 +150,93 @@ func TestFormatString(t *testing.T) {
 	}
 }
 
+func TestParseString(t *testing.T) {
+	s := "9e754ef6-8dd9-4903-af43-7aea99bfb1fe"
+	u, err := ParseString(s)
+	if err != nil {
+		t.Fatalf("Unexpected parsing error: %s", err.Error())
+	}
+	if u.FormatString() != s {
+		t.Fatalf("Invalid parsed UUID: %s", u.FormatString())
+	}
+}
+
+func TestParse16(t *testing.T) {
+	b := newV4(t)
+	u, err := Parse(b[:])
+	if err != nil {
+		t.Fatalf("Unexpected parsing error: %s", err.Error())
+	}
+	if b.FormatString() != u.FormatString() {
+		t.Fatalf("Invalid parsed UUID: %s", u.FormatString())
+	}
+}
+
+func TestParse32(t *testing.T) {
+	b := []byte("9e754ef68dd94903af437aea99bfb1fe")
+	u, err := Parse(b)
+	if err != nil {
+		t.Fatalf("Unexpected parsing error: %s", err.Error())
+	}
+	f := u.Format()
+	if !bytes.Equal(f[:], []byte("9e754ef6-8dd9-4903-af43-7aea99bfb1fe")) {
+		t.Fatalf("Unexpected parsing result: %s", f)
+	}
+
+	b = []byte("9e754ef68dd94903af437aea99bfb1fg")
+	_, err = Parse(b)
+	if err == nil {
+		t.Fatalf("Unexpected parsing success: %s", b)
+	}
+}
+
+func TestParse36(t *testing.T) {
+	b := []byte("9e754ef6-8dd9-4903-af43-7aea99bfb1fe")
+	u, err := Parse(b)
+	if err != nil {
+		t.Fatalf("Unexpected parsing error: %s", err.Error())
+	}
+	f := u.Format()
+	if !bytes.Equal(f[:], b) {
+		t.Fatalf("Unexpected parsing result: %s", f)
+	}
+}
+
+func TestParse36Error(t *testing.T) {
+	bb := [][]byte{
+		[]byte("9e754ef6-8dd9-4903-af437aea99bfb1fef"),
+		[]byte("9e754gf6-8dd9-4903-af43-7aea99bfb1fe"),
+	}
+	for _, b := range bb {
+		_, err := Parse(b)
+		if err != ErrInvalidUUID {
+			t.Fatalf("Unexpected parsing pass: %s", b)
+		}
+	}
+}
+
+func TestParseInvalid(t *testing.T) {
+	s := "bad"
+	_, err := ParseString(s)
+	if err == nil {
+		t.Fatal("Unexpected parsing success")
+	}
+}
+
+func BenchmarkParse(b *testing.B) {
+	buf := []byte("9e754ef6-8dd9-4903-af43-7aea99bfb1fe")
+	for i := 0; i < b.N; i++ {
+		_, _ = Parse(buf)
+	}
+}
+
+func BenchmarkParseString(b *testing.B) {
+	str := "9e754ef6-8dd9-4903-af43-7aea99bfb1fe"
+	for i := 0; i < b.N; i++ {
+		_, _ = ParseString(str)
+	}
+}
+
 func BenchmarkNewV3(b *testing.B) {
 	u, err := NewV4()
 	if err != nil {
