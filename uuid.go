@@ -90,6 +90,11 @@ func (u UUID) FormatString() string {
 	return string(b[:])
 }
 
+// Version returns the version number of the UUID, as specified in RFC 4122.
+func (u UUID) Version() int {
+	return int(u[6] >> 4)
+}
+
 // usingHash returns a new UUID using the provided hash function, namespace
 // UUID, name byte slice, and version number.
 func usingHash(h hash.Hash, namespace UUID, name []byte, version byte) UUID {

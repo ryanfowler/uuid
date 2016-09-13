@@ -58,6 +58,54 @@ func TestNewV5(t *testing.T) {
 	}
 }
 
+func TestVersion(t *testing.T) {
+	var table = []struct {
+		name       string
+		u          func() UUID
+		expVersion int
+	}{
+		{
+			name: "v3",
+			u: func() UUID {
+				u := newV4(t)
+				return NewV3(u, []byte("test"))
+			},
+			expVersion: 3,
+		},
+		{
+			name:       "v4",
+			u:          func() UUID { return newV4(t) },
+			expVersion: 4,
+		},
+		{
+			name: "v5",
+			u: func() UUID {
+				u := newV4(t)
+				return NewV5(u, []byte("test"))
+			},
+			expVersion: 5,
+		},
+	}
+
+	for i := 0; i < len(table); i++ {
+		ts := table[i]
+		t.Run(ts.name, func(t *testing.T) {
+			v := ts.u().Version()
+			if v != ts.expVersion {
+				t.Fatalf("Incorrect version: %d", v)
+			}
+		})
+	}
+}
+
+func newV4(t *testing.T) UUID {
+	u, err := NewV4()
+	if err != nil {
+		t.Fatalf("Unable to create UUID: %s", err.Error())
+	}
+	return u
+}
+
 func verifyVariant(t *testing.T, u UUID) {
 	v := u[8] >> 6
 	if v != 2 {
