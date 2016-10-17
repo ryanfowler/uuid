@@ -60,16 +60,17 @@ In other words, `same input -> same output`.
 #### Formatting
 
 A UUID represents a 16 byte array (128 bits).
-In order to use the UUID in a human-readable form, either `Format` or `FormatString` should be used.
+In order to use the UUID in a human-readable form, either `Format`, `Bytes`, or `String` should be used.
 
-Format will return the UUID bytes in the format:
+Format will return the UUID bytes as 36 byte array in the format:
 ```
 xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 where `x`'s are hexadecimal characters.
 
-FormatString will return the string representation of the above UUID format.
-The returned UUID string will have a length of 36 bytes.
+To format the UUID into a 36 byte slice, use `Bytes`.
+
+To format the UUID as a string, use `String`.
 
 #### Parsing
 
