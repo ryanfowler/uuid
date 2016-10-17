@@ -83,12 +83,20 @@ func (u UUID) Format() [36]byte {
 	return buf
 }
 
-// FormatString returns the human-readable, hexadecimal format of the UUID as a
-// string with length 36.
+// Bytes returns the hexadecimal format of the UUID as a slice of 36 bytes.
 //
 // Example: 9e754ef6-8dd9-5903-af43-7aea99bfb1fe
-func (u UUID) FormatString() string {
+func (u UUID) Bytes() []byte {
 	b := u.Format()
+	return b[:]
+}
+
+// String returns the human-readable, hexadecimal format of the UUID as a
+// string with a length of 36 bytes.
+//
+// Example: 9e754ef6-8dd9-5903-af43-7aea99bfb1fe
+func (u UUID) String() string {
+	b := u.Bytes()
 	return string(b[:])
 }
 
@@ -127,9 +135,9 @@ var ErrInvalidUUID = errors.New("uuid: invalid bytes provided")
 
 // Parse parses the provided UUID bytes, returning the UUID or any error
 // encountered. The following formats are provided:
-// - 16 byte raw UUID
-// - 32 byte formatted UUID without dashes e.g. 9e754ef68dd94903af437aea99bfb1fe
-// - 36 byte formatted UUID e.g "9e754ef6-8dd9-4903-af43-7aea99bfb1fe"
+//   16 byte raw, binary UUID
+//   32 byte hexadecimal formatted UUID without dashes e.g. 9e754ef68dd94903af437aea99bfb1fe
+//   36 byte hexadecimal formatted UUID e.g "9e754ef6-8dd9-4903-af43-7aea99bfb1fe"
 func Parse(b []byte) (UUID, error) {
 	switch len(b) {
 	case 16:

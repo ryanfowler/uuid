@@ -131,22 +131,41 @@ func TestFormat(t *testing.T) {
 	}
 }
 
-func TestFormatString(t *testing.T) {
+func TestBytes(t *testing.T) {
 	u, err := NewV4()
 	if err != nil {
 		panic(err)
 	}
-	fs := u.FormatString()
-	if len(fs) != 36 {
-		t.Errorf("Invalid UUID length: %d (expected 36)", len(fs))
+	b := u.Bytes()
+	if len(b) != 36 {
+		t.Errorf("Invalid UUID length: %d (expected 36)", len(b))
 	}
-	if fs[8] != '-' || fs[13] != '-' || fs[18] != '-' || fs[23] != '-' {
-		t.Errorf("Invalid UUID format: %s", fs)
+	if b[8] != '-' || b[13] != '-' || b[18] != '-' || b[23] != '-' {
+		t.Errorf("Invalid UUID format: %s", b)
+	}
+	bb := u.Format()
+	if !bytes.Equal(bb[:], b) {
+		t.Errorf("Format and FormatString return different UUIDs: %s vs %s",
+			bb, b)
+	}
+}
+
+func TestString(t *testing.T) {
+	u, err := NewV4()
+	if err != nil {
+		panic(err)
+	}
+	s := u.String()
+	if len(s) != 36 {
+		t.Errorf("Invalid UUID length: %d (expected 36)", len(s))
+	}
+	if s[8] != '-' || s[13] != '-' || s[18] != '-' || s[23] != '-' {
+		t.Errorf("Invalid UUID format: %s", s)
 	}
 	b := u.Format()
-	if !bytes.Equal(b[:], []byte(fs)) {
+	if !bytes.Equal(b[:], []byte(s)) {
 		t.Errorf("Format and FormatString return different UUIDs: %s vs %s",
-			b, fs)
+			b, s)
 	}
 }
 
@@ -156,8 +175,8 @@ func TestParseString(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected parsing error: %s", err.Error())
 	}
-	if u.FormatString() != s {
-		t.Fatalf("Invalid parsed UUID: %s", u.FormatString())
+	if u.String() != s {
+		t.Fatalf("Invalid parsed UUID: %s", u.String())
 	}
 }
 
@@ -167,8 +186,8 @@ func TestParse16(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected parsing error: %s", err.Error())
 	}
-	if b.FormatString() != u.FormatString() {
-		t.Fatalf("Invalid parsed UUID: %s", u.FormatString())
+	if b.String() != u.String() {
+		t.Fatalf("Invalid parsed UUID: %s", u.String())
 	}
 }
 
@@ -285,6 +304,6 @@ func BenchmarkFormatString(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = u.FormatString()
+		_ = u.String()
 	}
 }
