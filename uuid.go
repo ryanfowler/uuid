@@ -31,6 +31,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"hash"
+	"io"
 )
 
 // UUID represents a universally unique identifier made up of 128 bits.
@@ -48,7 +49,7 @@ func NewV3(namespace UUID, name []byte) UUID {
 // 4122. If an error occurs while reading from "crypto/rand", it is returned.
 func NewV4() (UUID, error) {
 	var u UUID
-	if _, err := rand.Read(u[:]); err != nil {
+	if _, err := io.ReadFull(rand.Reader, u[:]); err != nil {
 		return u, err
 	}
 	setVersion(&u, 4)
