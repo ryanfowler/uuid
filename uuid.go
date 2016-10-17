@@ -100,6 +100,30 @@ func (u UUID) String() string {
 	return string(b[:])
 }
 
+// MarshalBinary implements the BinaryMarshaler interface. It returns a byte
+// slice representing the 16 byte binary representation of the UUID.
+func (u UUID) MarshalBinary() ([]byte, error) {
+	b := u
+	return b[:], nil
+}
+
+// MarshalJSON implements the MarshalJSON interface. It returns a byte slice
+// representing the JSON string of a 36 byte hexadecimal representation of the
+// UUID.
+func (u UUID) MarshalJSON() ([]byte, error) {
+	var b [38]byte
+	b[0] = '"'
+	copy(b[1:], u.Bytes())
+	b[37] = '"'
+	return b[:], nil
+}
+
+// MarshalText implements the MarshalText interface. It returns a byte slice
+// representing the 36 byte hexadecimal representation of the UUID.
+func (u UUID) MarshalText() ([]byte, error) {
+	return u.Bytes(), nil
+}
+
 // Version returns the version number of the UUID, as specified in RFC 4122.
 func (u UUID) Version() int {
 	return int(u[6] >> 4)

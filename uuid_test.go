@@ -6,10 +6,7 @@ import (
 )
 
 func TestNewV3(t *testing.T) {
-	namespace, err := NewV4()
-	if err != nil {
-		t.Fatal(err)
-	}
+	namespace := newUUID()
 	name := []byte("testing")
 
 	u1 := NewV3(namespace, name)
@@ -18,33 +15,24 @@ func TestNewV3(t *testing.T) {
 
 	u2 := NewV3(namespace, name)
 	if !bytes.Equal(u1[:], u2[:]) {
-		t.Errorf("NewV3 returned different UUIDs with the same namespace & name: %s vs %s",
+		t.Fatalf("NewV3 returned different UUIDs with the same namespace & name: %s vs %s",
 			u1.Format(), u2.Format())
 	}
 }
 
 func TestNewV4(t *testing.T) {
-	u1, err := NewV4()
-	if err != nil {
-		t.Fatal(err)
-	}
+	u1 := newUUID()
 	verifyVariant(t, u1)
 	verifyVersion(t, u1, 4)
 
-	u2, err := NewV4()
-	if err != nil {
-		t.Fatal(err)
-	}
+	u2 := newUUID()
 	if bytes.Equal(u1[:], u2[:]) {
-		t.Errorf("NewV4 returned equal UUIDs: %s vs %s", u1.Format(), u2.Format())
+		t.Fatalf("NewV4 returned equal UUIDs: %s vs %s", u1.Format(), u2.Format())
 	}
 }
 
 func TestNewV5(t *testing.T) {
-	namespace, err := NewV4()
-	if err != nil {
-		t.Fatal(err)
-	}
+	namespace := newUUID()
 	name := []byte("testing")
 
 	u1 := NewV5(namespace, name)
@@ -53,7 +41,7 @@ func TestNewV5(t *testing.T) {
 
 	u2 := NewV5(namespace, name)
 	if !bytes.Equal(u1[:], u2[:]) {
-		t.Errorf("NewV5 returned different UUIDs with the same namespace & name: %s vs %s",
+		t.Fatalf("NewV5 returned different UUIDs with the same namespace & name: %s vs %s",
 			u1.Format(), u2.Format())
 	}
 }
@@ -67,20 +55,20 @@ func TestVersion(t *testing.T) {
 		{
 			name: "v3",
 			u: func() UUID {
-				u := newV4(t)
+				u := newUUID()
 				return NewV3(u, []byte("test"))
 			},
 			expVersion: 3,
 		},
 		{
 			name:       "v4",
-			u:          func() UUID { return newV4(t) },
+			u:          func() UUID { return newUUID() },
 			expVersion: 4,
 		},
 		{
 			name: "v5",
 			u: func() UUID {
-				u := newV4(t)
+				u := newUUID()
 				return NewV5(u, []byte("test"))
 			},
 			expVersion: 5,
@@ -98,74 +86,93 @@ func TestVersion(t *testing.T) {
 	}
 }
 
-func newV4(t *testing.T) UUID {
-	u, err := NewV4()
-	if err != nil {
-		t.Fatalf("Unable to create UUID: %s", err.Error())
-	}
-	return u
-}
-
 func verifyVariant(t *testing.T, u UUID) {
 	v := u[8] >> 6
 	if v != 2 {
-		t.Errorf("Expected variant '10', got '%x'", v)
+		t.Fatalf("Expected variant '10', got '%x'", v)
 	}
 }
 
 func verifyVersion(t *testing.T, u UUID, version byte) {
 	v := u[6] >> 4
 	if v != version {
-		t.Errorf("Expected version '%x', got '%x'", version, v)
+		t.Fatalf("Expected version '%x', got '%x'", version, v)
 	}
 }
 
 func TestFormat(t *testing.T) {
-	u, err := NewV4()
-	if err != nil {
-		panic(err)
-	}
+	u := newUUID()
 	f := u.Format()
 	if f[8] != '-' || f[13] != '-' || f[18] != '-' || f[23] != '-' {
-		t.Errorf("Invalid UUID format: %s", f)
+		t.Fatalf("Invalid UUID format: %s", f)
 	}
 }
 
 func TestBytes(t *testing.T) {
-	u, err := NewV4()
-	if err != nil {
-		panic(err)
-	}
+	u := newUUID()
 	b := u.Bytes()
 	if len(b) != 36 {
-		t.Errorf("Invalid UUID length: %d (expected 36)", len(b))
+		t.Fatalf("Invalid UUID length: %d (expected 36)", len(b))
 	}
 	if b[8] != '-' || b[13] != '-' || b[18] != '-' || b[23] != '-' {
-		t.Errorf("Invalid UUID format: %s", b)
+		t.Fatalf("Invalid UUID format: %s", b)
 	}
 	bb := u.Format()
 	if !bytes.Equal(bb[:], b) {
-		t.Errorf("Format and FormatString return different UUIDs: %s vs %s",
+		t.Fatalf("Format and FormatString return different UUIDs: %s vs %s",
 			bb, b)
 	}
 }
 
 func TestString(t *testing.T) {
-	u, err := NewV4()
-	if err != nil {
-		panic(err)
-	}
+	u := newUUID()
 	s := u.String()
 	if len(s) != 36 {
-		t.Errorf("Invalid UUID length: %d (expected 36)", len(s))
+		t.Fatalf("Invalid UUID length: %d (expected 36)", len(s))
 	}
 	if s[8] != '-' || s[13] != '-' || s[18] != '-' || s[23] != '-' {
-		t.Errorf("Invalid UUID format: %s", s)
+		t.Fatalf("Invalid UUID format: %s", s)
 	}
 	b := u.Format()
 	if !bytes.Equal(b[:], []byte(s)) {
-		t.Errorf("Format and FormatString return different UUIDs: %s vs %s",
+		t.Fatalf("Format and FormatString return different UUIDs: %s vs %s",
 			b, s)
+	}
+}
+
+func TestMarshalBinary(t *testing.T) {
+	u := newUUID()
+	b, err := u.MarshalBinary()
+	if err != nil {
+		t.Fatalf("Unexpected binary marshaling error: %s", err.Error())
+	}
+	if !bytes.Equal(u[:], b[:]) {
+		t.Fatalf("Unexpected binary marshaling result: %v", b)
+	}
+}
+
+func TestMarshalJSON(t *testing.T) {
+	u := newUUID()
+	b, err := u.MarshalJSON()
+	if err != nil {
+		t.Fatalf("Unexpected text marshaling error: %s", err.Error())
+	}
+	if !bytes.Equal(b[1:37], u.Bytes()) {
+		t.Fatalf("Unexpected text marshaling result: %v", b)
+	}
+	if b[0] != '"' || b[37] != '"' {
+		t.Fatalf("Unexpected text marshaling result: %v", b)
+	}
+}
+
+func TestMarshalText(t *testing.T) {
+	u := newUUID()
+	b, err := u.MarshalText()
+	if err != nil {
+		t.Fatalf("Unexpected text marshaling error: %s", err.Error())
+	}
+	if !bytes.Equal(b[:], u.Bytes()) {
+		t.Fatalf("Unexpected text marshaling result: %v", b)
 	}
 }
 
@@ -181,7 +188,7 @@ func TestParseString(t *testing.T) {
 }
 
 func TestParse16(t *testing.T) {
-	b := newV4(t)
+	b := newUUID()
 	u, err := Parse(b[:])
 	if err != nil {
 		t.Fatalf("Unexpected parsing error: %s", err.Error())
@@ -240,6 +247,14 @@ func TestParseInvalid(t *testing.T) {
 	if err == nil {
 		t.Fatal("Unexpected parsing success")
 	}
+}
+
+func newUUID() UUID {
+	u, err := NewV4()
+	if err != nil {
+		panic(err)
+	}
+	return u
 }
 
 func BenchmarkParse(b *testing.B) {
