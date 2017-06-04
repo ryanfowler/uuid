@@ -176,6 +176,17 @@ func TestMarshalText(t *testing.T) {
 	}
 }
 
+func TestValue(t *testing.T) {
+	u := newUUID()
+	v, err := u.Value()
+	if err != nil {
+		t.Fatalf("Unexpected value error: %s", err.Error())
+	}
+	if !bytes.Equal(v.([]byte), u.Bytes()) {
+		t.Fatalf("Unexpected value result: %v", v)
+	}
+}
+
 func TestParseString(t *testing.T) {
 	s := "9e754ef6-8dd9-4903-af43-7aea99bfb1fe"
 	u, err := ParseString(s)

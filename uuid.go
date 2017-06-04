@@ -28,6 +28,7 @@ import (
 	"crypto/md5"
 	"crypto/rand"
 	"crypto/sha1"
+	"database/sql/driver"
 	"encoding/hex"
 	"errors"
 	"hash"
@@ -97,8 +98,7 @@ func (u UUID) Bytes() []byte {
 //
 // Example: 9e754ef6-8dd9-5903-af43-7aea99bfb1fe
 func (u UUID) String() string {
-	b := u.Bytes()
-	return string(b[:])
+	return string(u.Bytes())
 }
 
 // MarshalBinary implements the BinaryMarshaler interface. It returns a byte
@@ -122,6 +122,12 @@ func (u UUID) MarshalJSON() ([]byte, error) {
 // MarshalText implements the MarshalText interface. It returns a byte slice
 // representing the 36 byte hexadecimal representation of the UUID.
 func (u UUID) MarshalText() ([]byte, error) {
+	return u.Bytes(), nil
+}
+
+// Value implements the SQL Driver Valuer interface. It returns a formatted byte
+// slice representation of the UUID.
+func (u UUID) Value() (driver.Value, error) {
 	return u.Bytes(), nil
 }
 
