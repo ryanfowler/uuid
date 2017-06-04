@@ -71,8 +71,12 @@ const dash = '-'
 // Example: 9e754ef6-8dd9-5903-af43-7aea99bfb1fe
 func (u UUID) Format() [36]byte {
 	var buf [36]byte
+	u.format(buf[:])
+	return buf
+}
 
-	hex.Encode(buf[:], u[:4])
+func (u UUID) format(buf []byte) {
+	hex.Encode(buf[0:], u[:4])
 	buf[8] = dash
 	hex.Encode(buf[9:], u[4:6])
 	buf[13] = dash
@@ -81,8 +85,6 @@ func (u UUID) Format() [36]byte {
 	hex.Encode(buf[19:], u[8:10])
 	buf[23] = dash
 	hex.Encode(buf[24:], u[10:])
-
-	return buf
 }
 
 // Bytes returns the hexadecimal format of the UUID as a slice of 36 bytes.
@@ -114,7 +116,7 @@ func (u UUID) MarshalBinary() ([]byte, error) {
 func (u UUID) MarshalJSON() ([]byte, error) {
 	var b [38]byte
 	b[0] = '"'
-	copy(b[1:], u.Bytes())
+	u.format(b[1:])
 	b[37] = '"'
 	return b[:], nil
 }
