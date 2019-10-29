@@ -142,8 +142,8 @@ func (u UUID) Version() int {
 // UUID, name byte slice, and version number.
 func usingHash(h hash.Hash, namespace UUID, name []byte, version byte) UUID {
 	var u UUID
-	h.Write(namespace[:])
-	h.Write(name)
+	_, _ = h.Write(namespace[:])
+	_, _ = h.Write(name)
 	copy(u[:], h.Sum(nil))
 	setVersion(&u, version)
 	setVariant(&u)
