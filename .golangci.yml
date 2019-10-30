@@ -1,0 +1,48 @@
+# This file contains all settings for the golangci-lint tool.
+
+linters-settings:
+  gofmt:
+    # Do not use the simplify flag since the goimports tool doesn't use it.
+    simplify: false
+
+linters:
+  disable-all: true
+  enable:
+    - deadcode
+    - errcheck
+    - goconst
+    - gocyclo
+    - gofmt
+    - golint
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - interfacer
+    - misspell
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on test files.
+    - path: _test\.go
+      linters:
+        - goconst
+        - gocyclo
+        - gosec
+
+    # Exclude the unparam warning about a method always receiving the same value.
+    - linters:
+        - unparam
+      text: " always receives "
+
+    # Exclude weak cryptographic primitive warnings as we use md5/sha1 for hashing.
+    - linters:
+        - gosec
+      text: "weak cryptographic primitive"
