@@ -1,4 +1,4 @@
-# UUID [![GoDoc](https://godoc.org/github.com/ryanfowler/uuid?status.svg)](https://godoc.org/github.com/ryanfowler/uuid) [![Go Report Card](https://goreportcard.com/badge/github.com/ryanfowler/uuid)](https://goreportcard.com/report/github.com/ryanfowler/uuid)
+# UUID [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/ryanfowler/uuid) [![Go Report Card](https://goreportcard.com/badge/github.com/ryanfowler/uuid)](https://goreportcard.com/report/github.com/ryanfowler/uuid)
 
 UUID provides functions for generating and formatting UUIDs according to RFC 4122.
 
@@ -6,7 +6,7 @@ UUID provides functions for generating and formatting UUIDs according to RFC 412
 
 #### Version 3
 
-Don't use v3 - use [v5](#version-5) (unless for legacy reasons).
+Use [v5](#version-5), if possible (unless for legacy reasons).
 
 #### Version 4
 
@@ -26,7 +26,7 @@ func main() {
 		// unable to read random bytes, bad!!!
 		return
 	}
-	fmt.Println(u.FormatString())
+	fmt.Println(u.String())
 }
 ```
 will output something like: `9e754ef6-8dd9-4903-af43-7aea99bfb1fe`.
