@@ -110,7 +110,17 @@ func (u UUID) MarshalBinary() ([]byte, error) {
 	return b[:], nil
 }
 
-// MarshalJSON implements the MarshalJSON interface. It returns a byte slice
+// UnmarshalBinary implements the BinaryUnmarshaler interface. It reads the
+// binary UUID from data into u.
+func (u *UUID) UnmarshalBinary(data []byte) error {
+	if len(data) != len(u) {
+		return ErrInvalidUUID
+	}
+	copy(u[:], data)
+	return nil
+}
+
+// MarshalJSON implements the json Marshaler interface. It returns a byte slice
 // representing the JSON string of a 36 byte hexadecimal representation of the
 // UUID.
 func (u UUID) MarshalJSON() ([]byte, error) {
@@ -121,16 +131,60 @@ func (u UUID) MarshalJSON() ([]byte, error) {
 	return b[:], nil
 }
 
-// MarshalText implements the MarshalText interface. It returns a byte slice
+// UnmarshalJSON implements the json Unmarshaler interface. It reads the json
+// UUID b into u.
+func (u *UUID) UnmarshalJSON(b []byte) error {
+	if len(b) != 38 || b[0] != '"' || b[37] != '"' {
+		return ErrInvalidUUID
+	}
+	id, err := Parse(b[1:37])
+	if err != nil {
+		return err
+	}
+	*u = id
+	return nil
+}
+
+// MarshalText implements the TextMarshaler interface. It returns a byte slice
 // representing the 36 byte hexadecimal representation of the UUID.
 func (u UUID) MarshalText() ([]byte, error) {
 	return u.Bytes(), nil
 }
 
-// Value implements the SQL Driver Valuer interface. It returns a formatted byte
+// UnmarshalText implements the TextUnmarshaler interface. It reads the text
+// UUID from text into u.
+func (u *UUID) UnmarshalText(text []byte) error {
+	id, err := Parse(text)
+	if err != nil {
+		return err
+	}
+	*u = id
+	return nil
+}
+
+// Value implements the sql driver Valuer interface. It returns a formatted byte
 // slice representation of the UUID.
 func (u UUID) Value() (driver.Value, error) {
 	return u.Bytes(), nil
+}
+
+// Scan implements the sql Scanner interface. It reads the UUID from src into u.
+func (u *UUID) Scan(src interface{}) error {
+	var id UUID
+	var err error
+	switch v := src.(type) {
+	case []byte:
+		id, err = Parse(v)
+	case string:
+		id, err = ParseString(v)
+	default:
+		err = ErrInvalidUUID
+	}
+	if err != nil {
+		return err
+	}
+	*u = id
+	return nil
 }
 
 // Version returns the version number of the UUID, as specified in RFC 4122.
@@ -164,7 +218,7 @@ func setVariant(u *UUID) {
 
 // ErrInvalidUUID represents the error returned during parsing when the provided
 // bytes do not represent a valid UUID.
-var ErrInvalidUUID = errors.New("uuid: invalid bytes provided")
+var ErrInvalidUUID = errors.New("uuid: invalid uuid provided")
 
 // Parse parses the provided UUID bytes, returning the UUID or any error
 // encountered. The following formats are provided:
