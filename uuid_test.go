@@ -2,7 +2,23 @@ package uuid
 
 import (
 	"bytes"
+	"database/sql"
+	"database/sql/driver"
+	"encoding"
+	"encoding/json"
 	"testing"
+)
+
+var (
+	_ driver.Valuer            = UUID{}
+	_ encoding.BinaryMarshaler = UUID{}
+	_ encoding.TextMarshaler   = UUID{}
+	_ json.Marshaler           = UUID{}
+
+	_ encoding.BinaryUnmarshaler = (*UUID)(nil)
+	_ encoding.TextUnmarshaler   = (*UUID)(nil)
+	_ json.Unmarshaler           = (*UUID)(nil)
+	_ sql.Scanner                = (*UUID)(nil)
 )
 
 func TestNewV3(t *testing.T) {
@@ -151,17 +167,55 @@ func TestMarshalBinary(t *testing.T) {
 	}
 }
 
+func TestUnmarshalBinary(t *testing.T) {
+	u1 := newUUID()
+	u2 := UUID{}
+	err := u2.UnmarshalBinary(u1[:])
+	if err != nil {
+		t.Fatalf("Unexpected binary unmarshaling error: %s", err.Error())
+	}
+	if !bytes.Equal(u1[:], u2[:]) {
+		t.Fatalf("Unexpected binary unmarshaling result: %v", u2)
+	}
+	u2 = UUID{}
+	err = u2.UnmarshalBinary([]byte{0})
+	if err != ErrInvalidUUID {
+		t.Fatalf("Unexpected binary unmarshaling error: %v", err)
+	}
+}
+
 func TestMarshalJSON(t *testing.T) {
 	u := newUUID()
 	b, err := u.MarshalJSON()
 	if err != nil {
-		t.Fatalf("Unexpected text marshaling error: %s", err.Error())
+		t.Fatalf("Unexpected json marshaling error: %s", err.Error())
 	}
 	if !bytes.Equal(b[1:37], u.Bytes()) {
-		t.Fatalf("Unexpected text marshaling result: %v", b)
+		t.Fatalf("Unexpected json marshaling result: %v", b)
 	}
 	if b[0] != '"' || b[37] != '"' {
-		t.Fatalf("Unexpected text marshaling result: %v", b)
+		t.Fatalf("Unexpected json marshaling result: %v", b)
+	}
+}
+
+func TestUnmarshalJSON(t *testing.T) {
+	u1 := newUUID()
+	b, err := u1.MarshalJSON()
+	if err != nil {
+		t.Fatalf("Unexpected json marshaling error: %s", err.Error())
+	}
+	u2 := UUID{}
+	err = u2.UnmarshalJSON(b)
+	if err != nil {
+		t.Fatalf("Unexpected json unmarshaling error: %s", err.Error())
+	}
+	if !bytes.Equal(u1[:], u2[:]) {
+		t.Fatalf("Unexpected json unmarshaling result: %v", u2)
+	}
+	u2 = UUID{}
+	err = u2.UnmarshalJSON([]byte{0})
+	if err != ErrInvalidUUID {
+		t.Fatalf("Unexpected json unmarshaling error: %v", err)
 	}
 }
 
@@ -176,6 +230,23 @@ func TestMarshalText(t *testing.T) {
 	}
 }
 
+func TestUnmarshalText(t *testing.T) {
+	u1 := newUUID()
+	u2 := UUID{}
+	err := u2.UnmarshalText(u1.Bytes())
+	if err != nil {
+		t.Fatalf("Unexpected text unmarshaling error: %s", err.Error())
+	}
+	if !bytes.Equal(u1[:], u2[:]) {
+		t.Fatalf("Unexpected text unmarshaling result: %v", u2)
+	}
+	u2 = UUID{}
+	err = u2.UnmarshalText([]byte{0})
+	if err != ErrInvalidUUID {
+		t.Fatalf("Unexpected text unmarshaling error: %v", err)
+	}
+}
+
 func TestValue(t *testing.T) {
 	u := newUUID()
 	v, err := u.Value()
@@ -184,6 +255,31 @@ func TestValue(t *testing.T) {
 	}
 	if !bytes.Equal(v.([]byte), u.Bytes()) {
 		t.Fatalf("Unexpected value result: %v", v)
+	}
+}
+
+func TestScan(t *testing.T) {
+	u1 := newUUID()
+	u2 := UUID{}
+	err := u2.Scan(u1.Bytes())
+	if err != nil {
+		t.Fatalf("Unexpected scan error: %s", err.Error())
+	}
+	if !bytes.Equal(u1[:], u2[:]) {
+		t.Fatalf("Unexpected scan result: %v", u2)
+	}
+	u2 = UUID{}
+	err = u2.Scan(u1.String())
+	if err != nil {
+		t.Fatalf("Unexpected scan error: %s", err.Error())
+	}
+	if !bytes.Equal(u1[:], u2[:]) {
+		t.Fatalf("Unexpected scan result: %v", u2)
+	}
+	u2 = UUID{}
+	err = u2.Scan(1)
+	if err != ErrInvalidUUID {
+		t.Fatalf("Unexpected scan error: %v", err)
 	}
 }
 
