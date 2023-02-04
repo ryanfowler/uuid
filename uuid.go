@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2020 Ryan Fowler
+// Copyright (c) 2023 Ryan Fowler
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -222,9 +222,10 @@ var ErrInvalidUUID = errors.New("uuid: invalid uuid provided")
 
 // Parse parses the provided UUID bytes, returning the UUID or any error
 // encountered. The following formats are provided:
-//   16 byte raw, binary UUID
-//   32 byte hexadecimal formatted UUID without dashes e.g. 9e754ef68dd94903af437aea99bfb1fe
-//   36 byte hexadecimal formatted UUID e.g "9e754ef6-8dd9-4903-af43-7aea99bfb1fe"
+//
+//	16 byte raw, binary UUID
+//	32 byte hexadecimal formatted UUID without dashes e.g. 9e754ef68dd94903af437aea99bfb1fe
+//	36 byte hexadecimal formatted UUID e.g "9e754ef6-8dd9-4903-af43-7aea99bfb1fe"
 func Parse(b []byte) (UUID, error) {
 	switch len(b) {
 	case 16:
