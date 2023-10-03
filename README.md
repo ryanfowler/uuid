@@ -45,7 +45,7 @@ import (
 func main() {
 	namespace := "9e754ef6-8dd9-5903-af43-7aea99bfb1fe"
 	u := uuid.NewV5(namespace, []byte("unique bytes"))
-	fmt.Println(u.FormatString())
+	fmt.Println(u.String())
 }
 ```
 will output something like: `e83915a5-a2c6-573b-a5f7-8cf2badd0af5`.
@@ -68,7 +68,7 @@ import (
 
 func main() {
 	u := uuid.Must(uuid.NewV7(time.Now()))
-	fmt.Println(u.FormatString())
+	fmt.Println(u.String())
 }
 ```
 
