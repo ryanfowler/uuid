@@ -4,11 +4,11 @@ UUID provides functions for generating and formatting UUIDs according to RFC 412
 
 ## Sample Usage
 
-#### Version 3
+### Version 3
 
 Use [v5](#version-5), if possible (unless for legacy reasons).
 
-#### Version 4
+### Version 4
 
 To generate a new v4 UUID:
 ```go
@@ -21,11 +21,7 @@ import (
 )
 
 func main() {
-	u, err := uuid.NewV4()
-	if err != nil {
-		// unable to read random bytes, bad!!!
-		return
-	}
+	u := uuid.Must(uuid.NewV4())
 	fmt.Println(u.String())
 }
 ```
@@ -34,7 +30,7 @@ will output something like: `9e754ef6-8dd9-4903-af43-7aea99bfb1fe`.
 NewV4 will only return an error when it is unable to read random bytes from the OS.
 Otherwise, the returned UUID will be made up of random bytes with the appropriate variant and version bits set.
 
-#### Version 5
+### Version 5
 
 To generate a new v5 UUID:
 ```go
@@ -57,7 +53,37 @@ will output something like: `e83915a5-a2c6-573b-a5f7-8cf2badd0af5`.
 UUIDs generated from NewV5 with the same namespace & name will be equal every time NewV5 is called.
 In other words, `same input -> same output`.
 
-#### Formatting
+### Version 7
+
+To generate a new v7 UUID:
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/ryanfowler/uuid"
+)
+
+func main() {
+	u := uuid.Must(uuid.NewV7(time.Now()))
+	fmt.Println(u.FormatString())
+}
+```
+
+To get the timestamp out of a v7 UUID, you can use the following method:
+
+```go
+u := uuid.Must(uuid.NewV7(time.Now()))
+timestamp, ok := u.Time()
+if !ok {
+	// UUID wasn't a v7 and could not read the timestamp.
+}
+fmt.Println(timestamp)
+```
+
+### Formatting
 
 A UUID represents a 16 byte array (128 bits).
 In order to use the UUID in a human-readable form, either `Format`, `Bytes`, or `String` should be used.
