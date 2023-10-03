@@ -33,12 +33,21 @@ import (
 	"errors"
 	"hash"
 	"io"
+	"time"
 )
 
 // UUID represents a universally unique identifier made up of 128 bits.
 //
 // For more information see: https://en.wikipedia.org/wiki/Universally_unique_identifier
 type UUID [16]byte
+
+// Must returns the provided UUID if err is nil, otherwise it panics.
+func Must(u UUID, err error) UUID {
+	if err != nil {
+		panic(err)
+	}
+	return u
+}
 
 // NewV3 uses the provided namespace and name to generate and return a new v3
 // UUID using MD5 hashing, as per RFC 4122.
@@ -62,6 +71,26 @@ func NewV4() (UUID, error) {
 // UUID using SHA1 hashing, as per RFC 4122.
 func NewV5(namespace UUID, name []byte) UUID {
 	return usingHash(sha1.New(), namespace, name, 5)
+}
+
+// NewV7 uses the provided timestamp to generate and return a new V7 UUID, as
+// per RFC 4122. If an error occurs while reading from "crypto/rand", it is
+// returned.
+func NewV7(now time.Time) (UUID, error) {
+	var u UUID
+	ms := uint64(now.UnixMilli())
+	u[0] = byte(ms >> 40)
+	u[1] = byte(ms >> 32)
+	u[2] = byte(ms >> 24)
+	u[3] = byte(ms >> 16)
+	u[4] = byte(ms >> 8)
+	u[5] = byte(ms)
+	if _, err := io.ReadFull(rand.Reader, u[6:]); err != nil {
+		return u, err
+	}
+	setVersion(&u, 7)
+	setVariant(&u)
+	return u, nil
 }
 
 const dash = '-'
@@ -190,6 +219,18 @@ func (u *UUID) Scan(src interface{}) error {
 // Version returns the version number of the UUID, as specified in RFC 4122.
 func (u UUID) Version() int {
 	return int(u[6] >> 4)
+}
+
+// Time returns the embedded timestamp of the UUID, and a boolean indicating
+// if a timestamp was successfully parsed.
+//
+// The provided UUID MUST be version 7.
+func (u UUID) Time() (time.Time, bool) {
+	if u.Version() != 7 {
+		return time.Time{}, false
+	}
+	ms := uint64(u[5]) | uint64(u[4])<<8 | uint64(u[3])<<16 | uint64(u[2])<<24 | uint64(u[1])<<32 | uint64(u[0])<<40
+	return time.UnixMilli(int64(ms)), true
 }
 
 // usingHash returns a new UUID using the provided hash function, namespace
