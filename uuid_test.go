@@ -7,6 +7,7 @@ import (
 	"encoding"
 	"encoding/json"
 	"testing"
+	"time"
 )
 
 var (
@@ -88,6 +89,17 @@ func TestVersion(t *testing.T) {
 				return NewV5(u, []byte("test"))
 			},
 			expVersion: 5,
+		},
+		{
+			name: "v7",
+			u: func() UUID {
+				u, err := NewV7(time.UnixMilli(1000))
+				if err != nil {
+					panic(err)
+				}
+				return u
+			},
+			expVersion: 7,
 		},
 	}
 
@@ -353,6 +365,26 @@ func TestParseInvalid(t *testing.T) {
 	_, err := ParseString(s)
 	if err == nil {
 		t.Fatal("Unexpected parsing success")
+	}
+}
+
+func TestTime(t *testing.T) {
+	now := time.UnixMilli(time.Now().UnixMilli())
+	u, err := NewV7(now)
+	if err != nil {
+		t.Fatalf("Unexpected error generating uuid v7: %s", err.Error())
+	}
+	ut, ok := u.Time()
+	if !ok {
+		t.Fatal("Unable to parse time from V7 UUID")
+	}
+	if !now.Equal(ut) {
+		t.Fatalf("Time not equal to original: %v vs %v", now, ut)
+	}
+
+	u = newUUID()
+	if _, ok := u.Time(); ok {
+		t.Fatal("Should not be able to parse time from a V4 UUID")
 	}
 }
 
