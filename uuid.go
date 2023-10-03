@@ -41,6 +41,14 @@ import (
 // For more information see: https://en.wikipedia.org/wiki/Universally_unique_identifier
 type UUID [16]byte
 
+// Must returns the provided UUID if err is nil, otherwise it panics.
+func Must(u UUID, err error) UUID {
+	if err != nil {
+		panic(err)
+	}
+	return u
+}
+
 // NewV3 uses the provided namespace and name to generate and return a new v3
 // UUID using MD5 hashing, as per RFC 4122.
 func NewV3(namespace UUID, name []byte) UUID {

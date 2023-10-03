@@ -388,6 +388,13 @@ func TestTime(t *testing.T) {
 	}
 }
 
+func TestMust(t *testing.T) {
+	u := Must(NewV4())
+	if u.Version() != 4 {
+		t.Fatalf("Unexpected UUID version: %d", u.Version())
+	}
+}
+
 func newUUID() UUID {
 	u, err := NewV4()
 	if err != nil {
