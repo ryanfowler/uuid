@@ -77,10 +77,9 @@ To get the timestamp out of a v7 UUID, you can use the following method:
 ```go
 u := uuid.Must(uuid.NewV7(time.Now()))
 timestamp, ok := u.Time()
-if !ok {
-	// UUID wasn't a v7 and could not read the timestamp.
+if ok {
+	fmt.Println(timestamp)
 }
-fmt.Println(timestamp)
 ```
 
 ### Formatting
