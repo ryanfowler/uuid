@@ -97,7 +97,7 @@ To format the UUID into a 36 byte slice, use `Bytes`.
 
 To format the UUID as a string, use `String`.
 
-#### Parsing
+### Parsing
 
 A UUID can be parsed from the following formats:
 
@@ -108,12 +108,9 @@ A UUID can be parsed from the following formats:
 Example:
 
 ```go
-b := []byte("9e754ef6-8dd9-4903-af43-7aea99bfb1fe")
-u, err := uuid.Parse(b)
-if err != nil {
-	return
-}
-fmt.Println(u.FormatString())
+raw := "9e754ef6-8dd9-4903-af43-7aea99bfb1fe"
+u := uuid.Must(uuid.ParseString(raw))
+fmt.Println(u.String())
 ```
 
 will ouput: `9e754ef6-8dd9-4903-af43-7aea99bfb1fe`.
