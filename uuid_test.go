@@ -396,11 +396,7 @@ func TestMust(t *testing.T) {
 }
 
 func newUUID() UUID {
-	u, err := NewV4()
-	if err != nil {
-		panic(err)
-	}
-	return u
+	return Must(NewV4())
 }
 
 func BenchmarkParse(b *testing.B) {
@@ -418,10 +414,7 @@ func BenchmarkParseString(b *testing.B) {
 }
 
 func BenchmarkNewV3(b *testing.B) {
-	u, err := NewV4()
-	if err != nil {
-		panic(err)
-	}
+	u := Must(NewV4())
 	name := []byte("test")
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -436,10 +429,7 @@ func BenchmarkNewV4(b *testing.B) {
 }
 
 func BenchmarkNewV5(b *testing.B) {
-	u, err := NewV4()
-	if err != nil {
-		panic(err)
-	}
+	u := Must(NewV4())
 	name := []byte("test")
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -447,22 +437,31 @@ func BenchmarkNewV5(b *testing.B) {
 	}
 }
 
-func BenchmarkFormat(b *testing.B) {
-	u, err := NewV4()
-	if err != nil {
-		panic(err)
+func BenchmarkNewV7(b *testing.B) {
+	now := time.Unix(1000, 0)
+	for i := 0; i < b.N; i++ {
+		_, _ = NewV7(now)
 	}
+}
+
+func BenchmarkFormat(b *testing.B) {
+	u := Must(NewV4())
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = u.Format()
 	}
 }
 
-func BenchmarkFormatString(b *testing.B) {
-	u, err := NewV4()
-	if err != nil {
-		panic(err)
+func BenchmarkFormatBytes(b *testing.B) {
+	u := Must(NewV4())
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = u.Bytes()
 	}
+}
+
+func BenchmarkFormatString(b *testing.B) {
+	u := Must(NewV4())
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = u.String()
