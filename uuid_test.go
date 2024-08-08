@@ -268,6 +268,14 @@ func TestValue(t *testing.T) {
 	if v.(string) != u.String() {
 		t.Fatalf("Unexpected value result: %v", v)
 	}
+	u = UUID{}
+	v, err = u.Value()
+	if err != nil {
+		t.Fatalf("Unexpected value error: %s", err.Error())
+	}
+	if v != nil {
+		t.Fatalf("Unexpected value result: %v", v)
+	}
 }
 
 func TestScan(t *testing.T) {
