@@ -191,10 +191,18 @@ func (u *UUID) UnmarshalText(text []byte) error {
 	return nil
 }
 
+// IsZero returns true if the UUID cotains all zeros (the default value).
+func (u UUID) IsZero() bool {
+	return u == UUID{}
+}
+
 // Value implements the sql driver Valuer interface. It returns a formatted byte
 // slice representation of the UUID.
 func (u UUID) Value() (driver.Value, error) {
-	return u.Bytes(), nil
+	if u.IsZero() {
+		return nil, nil
+	}
+	return u.String(), nil
 }
 
 // Scan implements the sql Scanner interface. It reads the UUID from src into u.
@@ -202,6 +210,7 @@ func (u *UUID) Scan(src interface{}) error {
 	var id UUID
 	var err error
 	switch v := src.(type) {
+	case nil:
 	case []byte:
 		id, err = Parse(v)
 	case string:

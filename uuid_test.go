@@ -265,7 +265,7 @@ func TestValue(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected value error: %s", err.Error())
 	}
-	if !bytes.Equal(v.([]byte), u.Bytes()) {
+	if v.(string) != u.String() {
 		t.Fatalf("Unexpected value result: %v", v)
 	}
 }
@@ -292,6 +292,26 @@ func TestScan(t *testing.T) {
 	err = u2.Scan(1)
 	if err != ErrInvalidUUID {
 		t.Fatalf("Unexpected scan error: %v", err)
+	}
+	u2 = UUID{}
+	err = u2.Scan(nil)
+	if err != nil {
+		t.Fatalf("Unexpected scan error: %v", err)
+	}
+	if !u2.IsZero() {
+		t.Fatalf("Expected UUID to be zero from scanning nil, got: %v", u2)
+	}
+}
+
+func TestIsEmpty(t *testing.T) {
+	u1 := Must(NewV4())
+	if u1.IsZero() {
+		t.Fatal("UUID v4 should not be zero")
+	}
+
+	var u2 UUID
+	if !u2.IsZero() {
+		t.Fatalf("Expected default UUID value to be zero, got: %v", u2)
 	}
 }
 
