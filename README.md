@@ -1,5 +1,7 @@
 # UUID [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/ryanfowler/uuid) [![Go Report Card](https://goreportcard.com/badge/github.com/ryanfowler/uuid)](https://goreportcard.com/report/github.com/ryanfowler/uuid)
 
+> **Deprecated:** Use the [`uuid`](https://pkg.go.dev/uuid) package in the standard library instead. This library is deprecated as of Go 1.27.
+
 UUID provides functions for generating and formatting UUIDs according to RFC 4122.
 
 ## Sample Usage
